@@ -1,30 +1,25 @@
-GREEN LION ENERGY · SUB-PREISPORTAL · CLOUDFLARE D1
+GREEN LION ENERGY · SUB-PREISPORTAL · VERSION MIT SPEICHER-BUTTON
 
-Dateien hochladen:
-1. Diesen Ordner in ein GitHub Repository hochladen.
-2. In Cloudflare Pages: Create application > Pages > Connect to Git.
-3. Repository auswählen.
-4. Build command leer lassen.
-5. Build output directory: / oder .
-6. Deploy starten.
+Änderungen in dieser Version:
+- Logo entfernt
+- Änderungen werden nicht mehr automatisch dauerhaft gespeichert
+- Neuer Button: "Speichern & aktualisieren"
+- Nach erfolgreichem Speichern wird die Seite neu geladen
+- Anzeige "Letzte Speicherung"
+- Mobile Darstellung optimiert
 
-D1 Datenbank anlegen:
-1. Cloudflare Dashboard > Workers & Pages > D1 SQL Database.
-2. Create database.
-3. Name z. B.: green_lion_subpreise
-4. Datenbank öffnen > Console.
-5. Inhalt aus schema.sql ausführen.
+GitHub Upload:
+1. index.html ersetzen
+2. functions/api/prices.js hochladen oder ersetzen
+3. schema.sql hochladen
 
-D1 an Pages binden:
-1. Cloudflare Pages Projekt öffnen.
-2. Settings > Functions > D1 database bindings.
-3. Add binding.
-4. Variable name: DB
-5. D1 database: green_lion_subpreise auswählen.
-6. Save.
-7. Danach: Deployments > Retry deployment oder neuen Deploy starten.
+Cloudflare D1:
+- Binding-Name muss exakt DB heißen
+- Datenbank kann green-lion-prices heißen
+- Wenn D1 korrekt verbunden ist, lädt /api/prices JSON
 
 Test:
+https://DEINE-SEITE.workers.dev/api/prices
+oder
 https://DEINE-SEITE.pages.dev/api/prices
 
-Wenn JSON erscheint, funktioniert die Live-Speicherung.
