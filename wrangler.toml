@@ -1,1 +1,8 @@
+name = "hoch-plus-hannover"
+main = "prices.js"
+compatibility_date = "2025-06-01"
 
+[[d1_databases]]
+binding = "DB"
+database_name = "green-lion-prices"
+database_id = "HIER_DEINE_DATABASE_ID_EINFÜGEN"
