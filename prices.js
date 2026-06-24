@@ -78,7 +78,7 @@ td button{width:100%}.modal{padding:10px}.modalbox{margin:10px auto;padding:15px
 <button class="ghost" onclick="addCategory()">+ Kategorie</button>
 <button class="ghost" onclick="addRow()">+ Neue Arbeit</button>
 <button class="dark" onclick="openHistory()">Historie</button>
-<button class="dark" onclick="exportPDF()">PDF erstellen</button>
+<button class="dark" onclick="openPDFModal()">PDF erstellen</button>
 <button class="primary" onclick="saveAll()">Speichern & aktualisieren</button>
 </div>
 
@@ -101,6 +101,18 @@ td button{width:100%}.modal{padding:10px}.modalbox{margin:10px auto;padding:15px
 <button class="danger" onclick="closeHistory()">Schließen</button>
 </div>
 <div id="historyList">Lade Historie...</div>
+</div>
+</div>
+
+<div class="modal" id="pdfModal">
+<div class="modalbox">
+<h2>PDF erstellen</h2>
+<p>Wähle aus, welches Gewerk ausgegeben werden soll.</p>
+<select id="pdfTradeSelect"></select>
+<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">
+<button class="ghost" onclick="closePDFModal()">Abbrechen</button>
+<button class="primary" onclick="exportPDF()">PDF erstellen</button>
+</div>
 </div>
 </div>
 
@@ -200,10 +212,16 @@ historyList.innerHTML=d.history.map(h=>'<div class="histitem"><b>'+new Date(h.cr
 
 function closeHistory(){historyModal.style.display='none';}
 
+function openPDFModal(){
+pdfTradeSelect.innerHTML='<option value="">Alle Gewerke</option>'+trades.map(t=>'<option value="'+esc(t)+'">'+esc(t)+'</option>').join('');
+pdfModal.style.display='block';
+}
+
+function closePDFModal(){pdfModal.style.display='none';}
+
 function exportPDF(){
-const selectedTrade=prompt('Welches Gewerk als PDF ausgeben?\\n\\nBeispiel: Dach, Fassade, Klempner, Gerüst\\nLeer lassen = alle Gewerke');
-const trade=(selectedTrade||'').trim();
-const list=items.filter(x=>!trade||String(x.trade||'').toLowerCase()===trade.toLowerCase());
+const trade=pdfTradeSelect.value;
+const list=items.filter(x=>!trade||x.trade===trade);
 if(!list.length){alert('Keine Positionen für dieses Gewerk gefunden.');return;}
 const title=trade?'Preisliste Gewerk: '+trade:'Preisliste alle Gewerke';
 const rowsHtml=list.map(x=>{
@@ -213,6 +231,7 @@ return '<tr><td>'+esc(x.trade||'')+'</td><td>'+esc(x.category||'')+'</td><td>'+e
 const win=window.open('','_blank');
 win.document.write('<!doctype html><html lang="de"><head><meta charset="utf-8"><title>'+esc(title)+'</title><style>body{font-family:Arial,sans-serif;color:#102018;margin:30px}h1{margin-bottom:5px}.sub{color:#66766b;margin-bottom:25px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{border:1px solid #dfe9e2;padding:7px;text-align:left;vertical-align:top}th{background:#eef7f0}.footer{margin-top:25px;font-size:11px;color:#66766b}@media print{body{margin:12mm}}</style></head><body><h1>'+esc(title)+'</h1><div class="sub">Hoch Plus Hannover GmbH · Erstellt am '+new Date().toLocaleString('de-DE')+'</div><table><thead><tr><th>Gewerk</th><th>Kategorie</th><th>Leistung</th><th>Material</th><th>EH</th><th>Menge</th><th>Material €/EH</th><th>Arbeit €/EH</th><th>Gesamt</th><th>Hinweis</th></tr></thead><tbody>'+rowsHtml+'</tbody></table><div class="footer">Green Lion Energy · SUB-Preisportal</div><script>window.onload=function(){setTimeout(function(){window.print()},300)}<\\/script></body></html>');
 win.document.close();
+closePDFModal();
 }
 
 search.oninput=render;
