@@ -377,7 +377,7 @@ export default {
         'SELECT payload FROM prices_state WHERE id=?'
       ).bind('current').first();
 
-      const beforePayload = oldRow ? oldRow.payload : JSON.stringify({items:starter,categories:defaultCategories});
+      .bind(Date.now().toString(), updatedAt, body.summary || 'Änderung gespeichert', beforePayload, payload).run();tCategories});
       const updatedAt = new Date().toISOString();
       const payload = JSON.stringify({
         items: body.items,
