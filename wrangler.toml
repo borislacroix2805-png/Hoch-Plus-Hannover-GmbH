@@ -5,4 +5,4 @@ compatibility_date = "2025-06-01"
 [[d1_databases]]
 binding = "DB"
 database_name = "green-lion-prices"
-database_id = "HIER_DEINE_DATABASE_ID_EINFÜGEN"
+database_id = "e31d3a4c-76a9-4a9e-858f-07afbf8a13a1"
