@@ -38,42 +38,288 @@ const html = `<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Green Lion Energy · SUB-Preisportal</title>
+
 <style>
-body{margin:0;font-family:Arial,sans-serif;background:#f5faf6;color:#102018}
-.hero{background:linear-gradient(135deg,#0d2418,#2f6b47);color:white;padding:38px 18px 78px}
-.wrap{max-width:1300px;margin:auto}
-.badge{display:inline-block;border:1px solid #9fc36c;border-radius:999px;padding:8px 14px;font-weight:700}
-.hero h1{font-size:48px;line-height:1.05;margin:22px 0 12px}
-.card{background:white;margin:-40px auto 30px;padding:24px;border-radius:26px;box-shadow:0 20px 60px #0002;max-width:1300px}
-.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
-input,select{padding:12px;border:1px solid #dfe9e2;border-radius:12px;font:inherit;box-sizing:border-box}
-button{border:0;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer}
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f5faf6;
+  color:#102018;
+  overflow-x:hidden;
+}
+
+.hero{
+  background:linear-gradient(135deg,#0d2418,#2f6b47);
+  color:white;
+  padding:38px 18px 78px;
+}
+
+.wrap{
+  max-width:1300px;
+  margin:auto;
+}
+
+.badge{
+  display:inline-block;
+  border:1px solid #9fc36c;
+  border-radius:999px;
+  padding:8px 14px;
+  font-weight:700;
+}
+
+.hero h1{
+  font-size:48px;
+  line-height:1.05;
+  margin:22px 0 12px;
+}
+
+.hero p{
+  max-width:850px;
+}
+
+.card{
+  background:white;
+  margin:-40px auto 30px;
+  padding:24px;
+  border-radius:26px;
+  box-shadow:0 20px 60px #0002;
+  max-width:1300px;
+  width:calc(100% - 24px);
+}
+
+.toolbar{
+  display:grid;
+  grid-template-columns:1.1fr 1fr 1fr auto auto auto auto;
+  gap:10px;
+  margin-bottom:18px;
+  align-items:center;
+}
+
+input,select{
+  padding:12px;
+  border:1px solid #dfe9e2;
+  border-radius:12px;
+  font:inherit;
+  width:100%;
+}
+
+button{
+  border:0;
+  border-radius:12px;
+  padding:12px 16px;
+  font-weight:700;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
 .primary{background:#2f6b47;color:white}
 .ghost{background:#eef7f0;color:#102018}
 .danger{background:#fff0f0;color:#9b1c1c}
 .dark{background:#102018;color:white}
-.tablewrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
-table{width:100%;min-width:1180px;border-collapse:collapse;background:white}
-th,td{border-bottom:1px solid #e4eee7;padding:10px;text-align:left;vertical-align:top}
-th{color:#66766b;font-size:12px;text-transform:uppercase}
-.money{font-weight:700;color:#2f6b47}
-.status{margin-top:14px;color:#66766b;font-size:14px}
-td input,td select{width:100%}
-.modal{display:none;position:fixed;inset:0;background:#0008;z-index:99;padding:20px;overflow:auto}
-.modalbox{background:white;max-width:1050px;margin:30px auto;padding:22px;border-radius:22px}
-.histitem{border:1px solid #e4eee7;border-radius:14px;padding:14px;margin:10px 0;background:#fbfffc}
-.small{font-size:13px;color:#66766b}
-pre{white-space:pre-wrap;background:#f3f7f4;padding:12px;border-radius:12px;overflow:auto}
-@media(max-width:900px){
-.hero{padding:26px 14px 70px}
-.hero h1{font-size:34px}
-.card{margin:-35px 10px 24px;padding:15px;border-radius:20px}
-.toolbar{display:grid;grid-template-columns:1fr;gap:10px}
-.toolbar input,.toolbar select,.toolbar button{width:100%}
-table{min-width:1100px}
+
+.tablewrap{
+  width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+table{
+  width:100%;
+  min-width:1180px;
+  border-collapse:collapse;
+  background:white;
+}
+
+th,td{
+  border-bottom:1px solid #e4eee7;
+  padding:10px;
+  text-align:left;
+  vertical-align:top;
+}
+
+th{
+  color:#66766b;
+  font-size:12px;
+  text-transform:uppercase;
+}
+
+td input,
+td select{
+  width:100%;
+}
+
+.money{
+  font-weight:700;
+  color:#2f6b47;
+}
+
+.status{
+  margin-top:14px;
+  color:#66766b;
+  font-size:14px;
+}
+
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#0008;
+  z-index:99;
+  padding:20px;
+  overflow:auto;
+}
+
+.modalbox{
+  background:white;
+  max-width:1050px;
+  margin:30px auto;
+  padding:22px;
+  border-radius:22px;
+}
+
+.histitem{
+  border:1px solid #e4eee7;
+  border-radius:14px;
+  padding:14px;
+  margin:10px 0;
+  background:#fbfffc;
+}
+
+pre{
+  white-space:pre-wrap;
+  background:#f3f7f4;
+  padding:12px;
+  border-radius:12px;
+  overflow:auto;
+}
+
+@media(max-width:1100px){
+  .toolbar{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .toolbar button{
+    width:100%;
+  }
+
+  .hero h1{
+    font-size:40px;
+  }
+
+  table{
+    min-width:1050px;
+  }
+}
+
+@media(max-width:760px){
+  .hero{
+    padding:22px 12px 62px;
+  }
+
+  .badge{
+    font-size:12px;
+  }
+
+  .hero h1{
+    font-size:29px;
+    line-height:1.15;
+  }
+
+  .hero p{
+    font-size:15px;
+  }
+
+  .card{
+    margin:-34px 8px 22px;
+    padding:12px;
+    border-radius:18px;
+    width:auto;
+  }
+
+  .toolbar{
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+
+  .toolbar input,
+  .toolbar select,
+  .toolbar button{
+    width:100%;
+  }
+
+  table,
+  thead,
+  tbody,
+  tr,
+  th,
+  td{
+    display:block;
+    width:100%;
+  }
+
+  thead{
+    display:none;
+  }
+
+  table{
+    min-width:0;
+  }
+
+  tr{
+    border:1px solid #dfe9e2;
+    border-radius:16px;
+    margin:12px 0;
+    padding:10px;
+    background:white;
+  }
+
+  td{
+    border:0;
+    padding:7px 0;
+  }
+
+  td:before{
+    content:attr(data-label);
+    display:block;
+    font-size:11px;
+    color:#66766b;
+    text-transform:uppercase;
+    font-weight:700;
+    margin-bottom:4px;
+  }
+
+  td input,
+  td select{
+    font-size:16px;
+    padding:10px;
+  }
+
+  td .money{
+    display:block;
+    background:#eef7f0;
+    padding:12px;
+    border-radius:12px;
+  }
+
+  td button{
+    width:100%;
+  }
+
+  .modal{
+    padding:10px;
+  }
+
+  .modalbox{
+    margin:10px auto;
+    padding:15px;
+    border-radius:18px;
+  }
 }
 </style>
 </head>
+
 <body>
 
 <div class="hero">
