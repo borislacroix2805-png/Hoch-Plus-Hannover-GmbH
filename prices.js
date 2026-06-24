@@ -46,7 +46,7 @@ body{margin:0;font-family:Arial,sans-serif;background:#f5faf6;color:#102018}
 .hero h1{font-size:48px;line-height:1.05;margin:22px 0 12px}
 .card{background:white;margin:-40px auto 30px;padding:24px;border-radius:26px;box-shadow:0 20px 60px #0002;max-width:1300px}
 .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px}
-input,select,textarea{padding:12px;border:1px solid #dfe9e2;border-radius:12px;font:inherit;box-sizing:border-box}
+input,select{padding:12px;border:1px solid #dfe9e2;border-radius:12px;font:inherit;box-sizing:border-box}
 button{border:0;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer}
 .primary{background:#2f6b47;color:white}
 .ghost{background:#eef7f0;color:#102018}
@@ -60,7 +60,7 @@ th{color:#66766b;font-size:12px;text-transform:uppercase}
 .status{margin-top:14px;color:#66766b;font-size:14px}
 td input,td select{width:100%}
 .modal{display:none;position:fixed;inset:0;background:#0008;z-index:99;padding:20px;overflow:auto}
-.modalbox{background:white;max-width:1000px;margin:30px auto;padding:22px;border-radius:22px}
+.modalbox{background:white;max-width:1050px;margin:30px auto;padding:22px;border-radius:22px}
 .histitem{border:1px solid #e4eee7;border-radius:14px;padding:14px;margin:10px 0;background:#fbfffc}
 .small{font-size:13px;color:#66766b}
 pre{white-space:pre-wrap;background:#f3f7f4;padding:12px;border-radius:12px;overflow:auto}
@@ -135,8 +135,17 @@ let items = [];
 let categories = [];
 let lastLoadedItems = [];
 
+const defaultCats = ${JSON.stringify(defaultCategories)};
 const fmt = n => new Intl.NumberFormat('de-DE',{style:'currency',currency:'EUR'}).format(+n || 0);
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+
+function esc(v){
+  return String(v ?? '')
+    .replaceAll('&','&amp;')
+    .replaceAll('<','&lt;')
+    .replaceAll('>','&gt;')
+    .replaceAll('"','&quot;');
+}
 
 function normalizeItem(x){
   return {
@@ -159,15 +168,22 @@ async function load(){
   items = (d.items || []).map(normalizeItem);
   lastLoadedItems = JSON.parse(JSON.stringify(items));
 
-  categories = Array.from(new Set([...(d.categories || []), ...items.map(x=>x.category), ...${JSON.stringify(defaultCategories)}])).filter(Boolean);
+  categories = Array.from(new Set([
+    ...(d.categories || []),
+    ...items.map(x => x.category),
+    ...defaultCats
+  ])).filter(Boolean);
 
   status.textContent = 'Letzte Speicherung: ' + (d.updatedAt ? new Date(d.updatedAt).toLocaleString('de-DE') : 'noch keine');
+
   renderCategoryFilter();
   render();
 }
 
 function renderCategoryFilter(){
+  const current = categoryFilter.value;
   categoryFilter.innerHTML = '<option value="">Alle Kategorien</option>' + categories.map(c => '<option>'+esc(c)+'</option>').join('');
+  categoryFilter.value = current;
 }
 
 function render(){
@@ -194,8 +210,9 @@ function render(){
     }).join('');
 }
 
-function cell(label,value){ return '<td data-label="'+label+'">'+value+'</td>'; }
-function esc(v){ return String(v ?? '').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'); }
+function cell(label,value){
+  return '<td data-label="'+label+'">'+value+'</td>';
+}
 
 function inp(i,k,v){
   return '<input value="'+esc(v)+'" onchange="items['+i+'].'+k+'=this.value;render()">';
@@ -221,7 +238,7 @@ function addCategory(){
 }
 
 function addRow(){
-  if(!categories.length) categories = ${JSON.stringify(defaultCategories)};
+  if(!categories.length) categories = defaultCats.slice();
   items.unshift({
     id:uid(),
     category:categories[0] || 'Sonstiges',
@@ -243,6 +260,19 @@ function delRow(i){
   }
 }
 
+function labelField(f){
+  return {
+    category:'Kategorie',
+    work:'Leistung',
+    material:'Material',
+    unit:'Einheit',
+    qty:'Menge',
+    materialPrice:'Material €/EH',
+    laborPrice:'Arbeit €/EH',
+    note:'Hinweis'
+  }[f] || f;
+}
+
 function diffSummary(before, after){
   const bMap = Object.fromEntries(before.map(x => [x.id, x]));
   const aMap = Object.fromEntries(after.map(x => [x.id, x]));
@@ -255,9 +285,17 @@ function diffSummary(before, after){
     }
 
     const fields = ['category','work','material','unit','qty','materialPrice','laborPrice','note'];
+
     for(const f of fields){
-      if(String(bMap[id][f] ?? '') !== String(aMap[id][f] ?? '')){
-        changes.push((aMap[id].work || bMap[id].work || id) + ': ' + f + ' von "' + (bMap[id][f] ?? '') + '" zu "' + (aMap[id][f] ?? '') + '"');
+      const oldVal = String(bMap[id][f] ?? '');
+      const newVal = String(aMap[id][f] ?? '');
+
+      if(oldVal !== newVal){
+        changes.push(
+          (aMap[id].work || bMap[id].work || id) +
+          ' · ' + labelField(f) +
+          ': vorher "' + oldVal + '" → nachher "' + newVal + '"'
+        );
       }
     }
   }
@@ -268,7 +306,7 @@ function diffSummary(before, after){
     }
   }
 
-  return changes.length ? changes.join('\\n') : 'Keine sichtbaren Änderungen';
+  return changes.length ? changes.join('\\n') : 'Gespeichert ohne sichtbare Änderung';
 }
 
 async function saveAll(){
@@ -282,13 +320,13 @@ async function saveAll(){
     body:JSON.stringify({
       items,
       categories,
-      before:lastLoadedItems,
       summary
     })
   });
 
   if(!r.ok){
-    status.textContent = 'Fehler beim Speichern';
+    const t = await r.text();
+    status.textContent = 'Fehler beim Speichern: ' + t;
     return;
   }
 
@@ -307,7 +345,7 @@ async function openHistory(){
     return;
   }
 
-  historyList.innerHTML = d.history.map(h => 
+  historyList.innerHTML = d.history.map(h =>
     '<div class="histitem">' +
       '<b>'+new Date(h.created_at).toLocaleString('de-DE')+'</b>' +
       '<pre>'+esc(h.summary)+'</pre>' +
@@ -377,8 +415,13 @@ export default {
         'SELECT payload FROM prices_state WHERE id=?'
       ).bind('current').first();
 
-      .bind(Date.now().toString(), updatedAt, body.summary || 'Änderung gespeichert', beforePayload, payload).run();tCategories});
+      const beforePayload = oldRow ? oldRow.payload : JSON.stringify({
+        items:starter,
+        categories:defaultCategories
+      });
+
       const updatedAt = new Date().toISOString();
+
       const payload = JSON.stringify({
         items: body.items,
         categories: body.categories || defaultCategories
@@ -390,7 +433,13 @@ export default {
 
       await env.DB.prepare(
         'INSERT INTO prices_history (id,created_at,summary,before_payload,after_payload) VALUES (?,?,?,?,?)'
-      ).bind(uid(), updatedAt, body.summary || 'Änderung gespeichert', beforePayload, payload).run();
+      ).bind(
+        crypto.randomUUID(),
+        updatedAt,
+        body.summary || 'Änderung gespeichert',
+        beforePayload,
+        payload
+      ).run();
 
       return new Response(JSON.stringify({
         updatedAt,
@@ -406,7 +455,9 @@ export default {
         'SELECT id,created_at,summary FROM prices_history ORDER BY created_at DESC LIMIT 100'
       ).all();
 
-      return new Response(JSON.stringify({ history: result.results || [] }), { status:200, headers });
+      return new Response(JSON.stringify({
+        history: result.results || []
+      }), { status:200, headers });
     }
 
     return new Response('Not found', { status:404 });
